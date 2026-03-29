@@ -1,0 +1,26 @@
+RecipeDetailResponse:
+  type: object
+  required:
+    - id
+    - name
+    - cuisine
+    - prepTimeMinutes
+    - ingredients
+    - steps
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+    cuisine:
+      type: string
+    prepTimeMinutes:
+      type: integer
+    ingredients:
+      type: array
+      items:
+        type: string
+    steps:
+      type: array
+      items:
+        type: string

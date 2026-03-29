@@ -1,0 +1,10 @@
+BadRequest:
+  description: Bad request
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/ApiError.yaml#/ApiError'
+      example:
+        status: 400
+        message: "name: must not be blank"
+        timestamp: "2026-03-30T10:00:00Z"

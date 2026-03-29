@@ -1,0 +1,14 @@
+ApiError:
+  type: object
+  required:
+    - status
+    - message
+    - timestamp
+  properties:
+    status:
+      type: integer
+    message:
+      type: string
+    timestamp:
+      type: string
+      format: date-time

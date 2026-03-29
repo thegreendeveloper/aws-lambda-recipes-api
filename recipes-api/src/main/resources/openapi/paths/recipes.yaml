@@ -1,0 +1,39 @@
+collection:
+  get:
+    operationId: listRecipes
+    tags:
+      - Recipes
+    summary: List all recipes
+    responses:
+      '200':
+        description: List of recipe summaries
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../components/schemas/RecipeSummaryResponse.yaml#/RecipeSummaryResponse'
+      '500':
+        $ref: '../components/responses/InternalServerError.yaml#/InternalServerError'
+  post:
+    operationId: createRecipe
+    tags:
+      - Recipes
+    summary: Create a new recipe
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CreateRecipeRequest.yaml#/CreateRecipeRequest'
+    responses:
+      '201':
+        description: Recipe created
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/RecipeDetailResponse.yaml#/RecipeDetailResponse'
+      '400':
+        $ref: '../components/responses/BadRequest.yaml#/BadRequest'
+      '500':
+        $ref: '../components/responses/InternalServerError.yaml#/InternalServerError'

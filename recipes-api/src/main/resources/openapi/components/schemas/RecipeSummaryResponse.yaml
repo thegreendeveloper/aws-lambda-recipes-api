@@ -1,0 +1,16 @@
+RecipeSummaryResponse:
+  type: object
+  required:
+    - id
+    - name
+    - cuisine
+    - prepTimeMinutes
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+    cuisine:
+      type: string
+    prepTimeMinutes:
+      type: integer

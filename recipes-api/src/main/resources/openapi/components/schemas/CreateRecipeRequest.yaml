@@ -1,0 +1,28 @@
+CreateRecipeRequest:
+  type: object
+  required:
+    - name
+    - cuisine
+    - prepTimeMinutes
+    - ingredients
+    - steps
+  properties:
+    name:
+      type: string
+      minLength: 1
+    cuisine:
+      type: string
+      minLength: 1
+    prepTimeMinutes:
+      type: integer
+      minimum: 1
+    ingredients:
+      type: array
+      minItems: 1
+      items:
+        type: string
+    steps:
+      type: array
+      minItems: 1
+      items:
+        type: string

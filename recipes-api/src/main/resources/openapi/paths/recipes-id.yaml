@@ -1,0 +1,19 @@
+item:
+  get:
+    operationId: getRecipeById
+    tags:
+      - Recipes
+    summary: Get a recipe by ID
+    parameters:
+      - $ref: '../components/parameters/RecipeIdParam.yaml#/RecipeIdParam'
+    responses:
+      '200':
+        description: Full recipe detail
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/RecipeDetailResponse.yaml#/RecipeDetailResponse'
+      '404':
+        $ref: '../components/responses/NotFound.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses/InternalServerError.yaml#/InternalServerError'

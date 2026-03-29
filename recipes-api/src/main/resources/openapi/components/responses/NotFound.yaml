@@ -1,0 +1,10 @@
+NotFound:
+  description: Resource not found
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/ApiError.yaml#/ApiError'
+      example:
+        status: 404
+        message: "Recipe with id '99' not found"
+        timestamp: "2026-03-30T10:00:00Z"

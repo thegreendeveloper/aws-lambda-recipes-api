@@ -1,0 +1,10 @@
+InternalServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/ApiError.yaml#/ApiError'
+      example:
+        status: 500
+        message: "Internal server error"
+        timestamp: "2026-03-30T10:00:00Z"

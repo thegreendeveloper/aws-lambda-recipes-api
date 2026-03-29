@@ -1,0 +1,29 @@
+openapi: "3.0.3"
+info:
+  title: Recipes API
+  version: "1.0.0"
+paths:
+  /recipes:
+    $ref: './paths/recipes.yaml#/collection'
+  /recipes/{id}:
+    $ref: './paths/recipes-id.yaml#/item'
+components:
+  schemas:
+    RecipeSummaryResponse:
+      $ref: './components/schemas/RecipeSummaryResponse.yaml#/RecipeSummaryResponse'
+    RecipeDetailResponse:
+      $ref: './components/schemas/RecipeDetailResponse.yaml#/RecipeDetailResponse'
+    CreateRecipeRequest:
+      $ref: './components/schemas/CreateRecipeRequest.yaml#/CreateRecipeRequest'
+    ApiError:
+      $ref: './components/schemas/ApiError.yaml#/ApiError'
+  parameters:
+    RecipeIdParam:
+      $ref: './components/parameters/RecipeIdParam.yaml#/RecipeIdParam'
+  responses:
+    NotFound:
+      $ref: './components/responses/NotFound.yaml#/NotFound'
+    BadRequest:
+      $ref: './components/responses/BadRequest.yaml#/BadRequest'
+    InternalServerError:
+      $ref: './components/responses/InternalServerError.yaml#/InternalServerError'

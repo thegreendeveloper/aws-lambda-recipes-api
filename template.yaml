@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Recipes API — AWS SAM template.
+  Defines the Lambda function and API Gateway routes for local testing and AWS deployment.
+  Local testing: sam local start-api (requires Docker).
+  Build first with: mvn clean package -DskipTests (Maven 'local' profile must NOT be active).
+
+# Globals apply to all Functions in this template unless overridden per resource.
+Globals:
+  Function:
+    # Must match the Java version in pom.xml (<java.version>17</java.version>).
+    Runtime: java17
+
+    # Spring Boot requires more memory than a typical Lambda. 512 MB is a reasonable
+    # baseline; increase if you observe out-of-memory errors or slow cold starts.
+    MemorySize: 1024
+
+    # Generous timeout to accommodate Spring Boot cold starts (context initialisation
+    # on first invocation can take several seconds). Tune down once warm-start
+    # latency is profiled in production.
+    # Cold start on first invocation takes ~60s locally (Spring Boot context init).
+    # Subsequent requests on a warm container are fast. Keep this high for local
+    # SAM testing; tune down for production after profiling warm-start latency.
+    Timeout: 120
+
+    Environment:
+      Variables:
+        # Explicitly clear the Spring profile so ServerlessAutoConfiguration loads,
+        # replacing Tomcat with the Lambda-compatible servlet context.
+        # The 'local' Spring profile (which disables this) must NOT be active here.
+        SPRING_PROFILES_ACTIVE: ""
+
+Resources:
+  RecipesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      # AWS Lambda entry point. StreamLambdaHandler implements RequestStreamHandler
+      # and delegates each invocation to the Spring MVC DispatcherServlet via
+      # SpringBootLambdaContainerHandler. See StreamLambdaHandler.java for details.
+      Handler: com.recipes.api.handler.StreamLambdaHandler::handleRequest
+
+      # Path to the fat JAR produced by 'mvn clean package'.
+      # Spring Boot Maven Plugin packages all dependencies into this single JAR
+      # with the aws-serverless-java-container unpacked (layout: ZIP) so Lambda
+      # can load classes efficiently from the /lib directory.
+      CodeUri: recipes-api/target/recipes-api-rest-1.0.0.jar
+
+      # API Gateway event sources — one entry per endpoint.
+      # SAM creates a default API Gateway (ServerlessRestApi) and wires these routes
+      # to the Lambda function automatically.
+      Events:
+        ListRecipes:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: GET
+
+        CreateRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: POST
+
+        GetRecipeById:
+          Type: Api
+          Properties:
+            Path: /recipes/{id}
+            Method: GET
