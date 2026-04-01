@@ -120,7 +120,10 @@ deploying.
 
 **Build** (Maven `local` profile must be OFF):
 
-Use IntelliJ Maven tool window → `recipes-api-rest` → Lifecycle → Skip Tests → `package`
+```bash
+mvn clean package -DskipTests
+sam build
+```
 
 **Run:**
 
@@ -177,7 +180,10 @@ permissions.
 
 **Build** (Maven `local` profile must be OFF):
 
-Use IntelliJ Maven tool window → `recipes-api-rest` → Lifecycle → Skip Tests → `package`
+```bash
+mvn clean package -DskipTests
+sam build
+```
 
 **First-time deploy:**
 

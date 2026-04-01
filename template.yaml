@@ -34,17 +34,20 @@ Globals:
 Resources:
   RecipesFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      # Use a Makefile instead of SAM's default Maven workflow.
+      # The Makefile simply copies the pre-built fat JAR to ARTIFACTS_DIR,
+      # avoiding a full Maven rebuild (and checkstyle) on every sam build.
+      BuildMethod: makefile
     Properties:
       # AWS Lambda entry point. StreamLambdaHandler implements RequestStreamHandler
       # and delegates each invocation to the Spring MVC DispatcherServlet via
       # SpringBootLambdaContainerHandler. See StreamLambdaHandler.java for details.
       Handler: com.recipes.api.handler.StreamLambdaHandler::handleRequest
 
-      # Path to the fat JAR produced by 'mvn clean package'.
-      # Spring Boot Maven Plugin packages all dependencies into this single JAR
-      # with the aws-serverless-java-container unpacked (layout: ZIP) so Lambda
-      # can load classes efficiently from the /lib directory.
-      CodeUri: recipes-api/target/recipes-api-rest-1.0.0.jar
+      # Path to the recipes-api module folder containing the Makefile.
+      # SAM will invoke the Makefile to copy the pre-built fat JAR to the staging directory.
+      CodeUri: recipes-api/
 
       # API Gateway event sources — one entry per endpoint.
       # SAM creates a default API Gateway (ServerlessRestApi) and wires these routes

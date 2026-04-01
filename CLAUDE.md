@@ -94,9 +94,11 @@ before deploying to AWS.
 
 ### Build
 
-Build via IntelliJ Maven tool window (Maven `local` profile must be OFF):
-
-- Maven tool window → `recipes-api-rest` → Lifecycle → enable Skip Tests → double-click `package`
+```bash
+# Maven 'local' profile must be OFF
+mvn clean package -DskipTests
+sam build
+```
 
 ### Run
 
@@ -155,12 +157,15 @@ and IAM.
 
 ```bash
 # 1. Build (Maven 'local' profile must be OFF)
-#    Use IntelliJ Maven tool window → package (with Skip Tests)
+mvn clean package -DskipTests
 
-# 2. First-time deploy — interactive setup, saves settings to samconfig.toml
+# 2. Stage the JAR for SAM (copies JAR into .aws-sam/build/ via Makefile)
+sam build
+
+# 3. First-time deploy — interactive setup, saves settings to samconfig.toml
 sam deploy --guided
 
-# 3. Subsequent deploys
+# 4. Subsequent deploys
 sam deploy
 ```
 

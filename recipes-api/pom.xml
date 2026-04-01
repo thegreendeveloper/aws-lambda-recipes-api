@@ -190,7 +190,6 @@
                 Lambda's classloader.
 
                 Key transformers:
-                - ManifestResourceTransformer: sets the Main-Class
                 - ServicesResourceTransformer: merges META-INF/services/* files
                   (required for SPI providers like Jackson, Hibernate Validator)
                 - AppendingTransformer: merges Spring Boot auto-configuration
@@ -213,7 +212,20 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <transformers>
+                            <!--
+                                combine.self="override" prevents Maven from positionally
+                                merging this list with the parent's (spring-boot-starter-parent
+                                defines its own <transformers> list). Without it, parent entry 0
+                                — an AppendingTransformer with <resource> — gets merged onto our
+                                ServicesResourceTransformer, which has no 'resource' field,
+                                causing a PluginConfigurationException at build time.
+                            -->
+                            <transformers combine.self="override">
+                                <!-- Merges META-INF/services/* SPI files across all JARs.
+                                     Without this, only one JAR's services file wins, breaking
+                                     Jackson, Hibernate Validator, and other SPI-based providers. -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!-- Merges Spring Boot auto-configuration descriptors across all JARs.
                                      Without this, only one module's auto-configurations would be registered. -->
                                 <transformer

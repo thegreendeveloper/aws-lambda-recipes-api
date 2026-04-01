@@ -1,3 +1,5 @@
 .claude/
 .idea/
 target/
+.aws-sam/
+META-INF/
