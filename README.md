@@ -217,6 +217,50 @@ Outputs:
 
 ---
 
+## Deployment Challenges
+
+A few non-obvious problems had to be solved to get `StreamLambdaHandler` deploying and running correctly on Lambda.
+
+### 1. JAR layout — flat uber JAR vs Spring Boot nested JAR
+
+AWS Lambda's classloader requires all `.class` files to be at the **root** of the JAR. Spring Boot's default repackage
+plugin produces a **nested JAR** where classes live under `BOOT-INF/classes/`, which Lambda cannot load. This means
+`StreamLambdaHandler` was simply not found at startup.
+
+The fix is `maven-shade-plugin`, which merges all dependencies into a single flat uber JAR with classes at the root.
+Spring Boot's repackage goal is explicitly disabled in `recipes-api/pom.xml` to prevent it from re-wrapping the shade
+output.
+
+The shade plugin is also configured with resource transformers to handle two merge conflicts that arise when flattening
+many JARs into one:
+
+- `ServicesResourceTransformer` — merges `META-INF/services/` SPI files; without this, only one JAR's service
+  registrations win, breaking Jackson, Hibernate Validator, and other SPI-based providers.
+- `AppendingTransformer` (x2) — merges Spring Boot auto-configuration descriptor files (`spring.factories` and
+  `AutoConfiguration.imports`); without this, only one module's auto-configurations are registered and Spring context
+  startup fails.
+
+Signed JAR entries (`*.SF`, `*.DSA`, `*.RSA`) are also excluded to prevent `SecurityException` at runtime when the
+merged JAR's signatures no longer match.
+
+### 2. SAM build — getting the right JAR into the staging directory
+
+SAM's default Maven build workflow doesn't know where the shade-produced JAR lands, and it re-runs Maven itself (which
+triggers Checkstyle and other lifecycle phases). To take control of the staging step, `template.yaml` sets
+`BuildMethod: makefile` on the function, delegating to `recipes-api/Makefile`.
+
+The Makefile does one thing: copy the pre-built fat JAR from `target/` into `ARTIFACTS_DIR/lib/`, which is the path SAM
+packages and uploads to S3. Without this, SAM was either uploading the wrong artifact or failing to find the handler
+class entirely.
+
+### 3. `samconfig.toml` — persisting deployment parameters
+
+`sam deploy --guided` generates `samconfig.toml`, which stores the stack name, AWS region, S3 prefix, and IAM
+capability settings. This allows all subsequent deploys to run as plain `sam deploy` without repeating the interactive
+prompts. It is checked into source control so the deployment configuration is reproducible.
+
+---
+
 ## OpenAPI / Code Generation
 
 The API contract is defined in:
