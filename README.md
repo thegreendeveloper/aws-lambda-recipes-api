@@ -10,6 +10,47 @@ A REST API for managing recipes, built with Spring Boot and deployed as an AWS L
 - OpenAPI / Swagger UI documentation
 - Input validation with meaningful error responses
 
+## Architecture decisions
+
+**Spring Boot as the framework**
+Picked Spring Boot because it's the framework I'm most familiar with and the
+fastest to scaffold a working REST API in. The tradeoff is cold start time —
+on Lambda, Spring Boot context init takes 5–8 seconds because of runtime
+reflection-based dependency injection.
+
+**Single Lambda for the whole API via `aws-serverless-java-container`**
+The entire Spring Boot app runs inside one Lambda function, with
+`aws-serverless-java-container` bridging API Gateway events to Spring MVC.
+Simpler deployment surface — one function, one log group, one IAM role —
+at the cost of all endpoints sharing the same cold start and scaling
+together. The alternative would be one Lambda per endpoint for independent
+scaling and smaller deploy units, at the cost of more configuration and
+more cold-start surface area.
+
+**Spec-first OpenAPI with code generation**
+The OpenAPI spec is the source of truth — controller interfaces and
+request/response models are generated from it during `mvn generate-sources`.
+Gives consistent documentation, generated client code, and a single place
+to review API changes.
+
+**In-memory data store**
+No database. Recipes live in a list in memory and are lost on cold start.
+Deliberate choice — the goal of this project was getting Spring Boot to
+deploy and run on Lambda end-to-end, not modelling a real persistence
+layer.
+
+**Multi-module Maven build (`repository` / `service` / `api`)**
+Split into three modules to enforce separation of concerns at build time
+— the `api` module depends on `service`, `service` depends on `repository`,
+no upward dependencies.
+
+**Maven shade over Spring Boot repackage**
+Lambda's classloader requires classes at the root of the JAR; Spring Boot's
+default nested-JAR layout (`BOOT-INF/classes/`) doesn't work. Shade plugin
+produces a flat uber JAR with the right merging for SPI services and
+auto-configuration descriptors. See **Deployment Challenges** below for the
+full story.
+
 ## Tech Stack
 
 | Layer          | Technology                          |
